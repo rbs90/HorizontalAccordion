@@ -10,7 +10,10 @@ import java.io.IOException;
  */
 public class TitlePane extends JLabel {
 
-    public TitlePane(String text) {
+    private AccordionElement parent;
+
+    public TitlePane(String text, AccordionElement parent) {
+        this.parent = parent;
         this.setText(text);
         this.setBackground(Color.GREEN);
         setOpaque(true);
@@ -23,26 +26,44 @@ public class TitlePane extends JLabel {
         int w = getWidth();
         int h = getHeight();
 
-        Color color1 = getBackground();
-        Color color2 = color1.brighter();
-
-        GradientPaint gp = new GradientPaint( 0, 0, Color.ORANGE, w, 0, Color.RED);
+        GradientPaint gp = new GradientPaint( 0, 0, Color.BLACK, w, h, new Color(100 - parent.getPercentage(), parent.getPercentage(), 0));
 
         g2d.setPaint( gp );
         g2d.fillRect( 0, 0, w, h );
 
-        AffineTransform at = new AffineTransform();
-        at.setToRotation(Math.PI/2.0);
+        g2d.setColor(Color.BLACK);
+
+        g2d.fillRect(0, 0, 4, h);
+        if(!parent.isExpanded())
+            g2d.fillRect(w-4, 0, w, h);
+
+        AffineTransform at = AffineTransform.getRotateInstance(Math.toRadians(270));
+
+        AffineTransform at2 = null;
         try {
-            Font font = Font.createFont(Font.TRUETYPE_FONT, new FileInputStream("planer.otf")).deriveFont(40f);
+            Font font = Font.createFont(Font.TRUETYPE_FONT, new FileInputStream("roboto.ttf"));
+            if(parent.expanded) {
+                at2 = AffineTransform.getTranslateInstance(36, h - 25);
+                font = font.deriveFont(30f);
+            }
+            else {
+                at2 = AffineTransform.getTranslateInstance(23, h - 20);
+                font = font.deriveFont(20f);
+            }
+
             g2d.setFont(font);
         } catch (FontFormatException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        g2d.setColor(Color.BLACK);
-        g2d.setTransform(at);
+        g2d.setColor(Color.WHITE);
+        g2d.setRenderingHint(
+                RenderingHints.KEY_TEXT_ANTIALIASING,
+                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+        g2d.transform(at2);
+        g2d.transform(at);
         g2d.drawString(getText(), 0, 0);
     }
 }
